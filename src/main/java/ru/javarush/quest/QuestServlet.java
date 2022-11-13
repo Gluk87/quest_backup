@@ -1,4 +1,4 @@
-package ru.javarush.quest.servlet;
+package ru.javarush.quest;
 
 import lombok.extern.slf4j.Slf4j;
 import ru.javarush.quest.entity.Answer;
@@ -14,8 +14,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 
-@Slf4j
 @WebServlet("/quest")
+@Slf4j
 public class QuestServlet extends HttpServlet {
     private QuestRepository questRepository;
     private UserRepository userRepository;
@@ -25,7 +25,6 @@ public class QuestServlet extends HttpServlet {
         try {
             questRepository = new QuestRepository();
             if (userRepository == null) {
-                System.out.println("Creating userRepository");
                 userRepository = new UserRepository();
                 log.info("Creating userRepository");
             }
