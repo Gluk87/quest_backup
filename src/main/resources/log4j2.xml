@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="Debug" name="MyApp" packages="">
     <Appenders>
-        <RollingFile name="RollingFile" fileName="logs/hippodrome.log"
+        <RollingFile name="RollingFile" fileName="logs/quest.log"
                      filePattern="logs/quest.%d{yyyy-MM-dd}.log">
             <PatternLayout>
                 <Pattern>%d %p %c{1.}: %m%n</Pattern>

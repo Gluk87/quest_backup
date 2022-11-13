@@ -19,7 +19,6 @@ import java.util.List;
 public class QuestServlet extends HttpServlet {
     private QuestRepository questRepository;
     private UserRepository userRepository;
-    private User user;
 
     @Override
     public void init() {
@@ -40,14 +39,15 @@ public class QuestServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
         String userName = request.getParameter("userName");
+        User user;
 
         if (!userRepository.isExists(userName)) {
-            System.out.println("Creating new User");
             user = new User(userName);
             userRepository.save(userName, user);
+            log.info("Creating new User " + userName);
         } else {
-            System.out.println("User is exists");
             user = userRepository.getUserByName(userName);
+            log.info("User " + userName + " is exists");
         }
 
         int nextQuestionId = Integer.parseInt(request.getParameter("nextQuestionId"));
@@ -55,11 +55,8 @@ public class QuestServlet extends HttpServlet {
         boolean isWrongAnswer = checkNegativeNumber(nextQuestionId);
         String question = questRepository.getQuestionTextById(nextQuestionId);
 
-        System.out.println("userName = " + user);
-        System.out.println("nextQuestionId = " + nextQuestionId);
-        System.out.println("isLastQuestion = " + isLastQuestion);
-        System.out.println("isWrongAnswer = " + isWrongAnswer);
-        System.out.println("question = " + question);
+        log.info(user.toString() + ", nextQuestionId = " + nextQuestionId + ", isLastQuestion = " + isLastQuestion +
+                ", isWrongAnswer = " + isWrongAnswer + ", question = " + question);
 
         if (!isLastQuestion && !isWrongAnswer){
             List<Answer> answersByQuestion = questRepository.getAnswersByQuestionId(nextQuestionId);
@@ -76,10 +73,12 @@ public class QuestServlet extends HttpServlet {
             user.incrCountGames();
             user.incrWin();
             request.setAttribute("text",question);
+            log.info(user.getName() + " win! " + " CountGames = " + user.getCountGames() + ". CountWin = " + user.getCountWin());
             request.getRequestDispatcher("final.jsp").forward(request, response);
         } else {
             user.incrCountGames();
             request.setAttribute("text",question);
+            log.info(user.getName() + " lost! " + " CountGames = " + user.getCountGames() + ". CountWin = " + user.getCountWin());
             request.getRequestDispatcher("final.jsp").forward(request, response);
         }
     }

@@ -24,6 +24,7 @@
                 ${answer.getText()}
         </label>
     </div>
+
 </c:forEach>
 <br>
 <button type="submit" class="btn btn-primary">Ответить</button>
@@ -46,11 +47,11 @@
             <td><%= session.getAttribute("IP")%></td>
         </tr>
         <tr>
-            <td>Всего игр: </td>
+            <td>Количество игр: </td>
             <td>${countGames}</td>
         </tr>
         <tr>
-            <td>Всего побед:  </td>
+            <td>Количество побед:  </td>
             <td>${countWin}</td>
         </tr>
     </table>
