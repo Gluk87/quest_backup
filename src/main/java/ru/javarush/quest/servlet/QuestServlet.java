@@ -1,0 +1,90 @@
+package ru.javarush.quest.servlet;
+
+import lombok.extern.slf4j.Slf4j;
+import ru.javarush.quest.entity.Answer;
+import ru.javarush.quest.entity.User;
+import ru.javarush.quest.repository.QuestRepository;
+import ru.javarush.quest.repository.UserRepository;
+
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.List;
+
+@Slf4j
+@WebServlet("/quest")
+public class QuestServlet extends HttpServlet {
+    private QuestRepository questRepository;
+    private UserRepository userRepository;
+    private User user;
+
+    @Override
+    public void init() {
+        try {
+            questRepository = new QuestRepository();
+            if (userRepository == null) {
+                System.out.println("Creating userRepository");
+                userRepository = new UserRepository();
+                log.info("Creating userRepository");
+            }
+        } catch (IOException e) {
+            log.error(e.getMessage());
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+
+        String userName = request.getParameter("userName");
+
+        if (!userRepository.isExists(userName)) {
+            System.out.println("Creating new User");
+            user = new User(userName);
+            userRepository.save(userName, user);
+        } else {
+            System.out.println("User is exists");
+            user = userRepository.getUserByName(userName);
+        }
+
+        int nextQuestionId = Integer.parseInt(request.getParameter("nextQuestionId"));
+        boolean isLastQuestion = Boolean.parseBoolean(request.getParameter("isLastQuestion"));
+        boolean isWrongAnswer = checkNegativeNumber(nextQuestionId);
+        String question = questRepository.getQuestionTextById(nextQuestionId);
+
+        System.out.println("userName = " + user);
+        System.out.println("nextQuestionId = " + nextQuestionId);
+        System.out.println("isLastQuestion = " + isLastQuestion);
+        System.out.println("isWrongAnswer = " + isWrongAnswer);
+        System.out.println("question = " + question);
+
+        if (!isLastQuestion && !isWrongAnswer){
+            List<Answer> answersByQuestion = questRepository.getAnswersByQuestionId(nextQuestionId);
+            isLastQuestion = questRepository.isLastQuestionById(nextQuestionId);
+            request.setAttribute("question", question);
+            request.setAttribute("answers", answersByQuestion);
+            request.setAttribute("nextQuestonId", nextQuestionId);
+            request.setAttribute("isLastQuestion", isLastQuestion);
+            request.setAttribute("userName", user.getName());
+            request.setAttribute("countGames", user.getCountGames());
+            request.setAttribute("countWin", user.getCountWin());
+            request.getRequestDispatcher("quest.jsp").forward(request, response);
+        } else if (isLastQuestion && !isWrongAnswer) {
+            user.incrCountGames();
+            user.incrWin();
+            request.setAttribute("text",question);
+            request.getRequestDispatcher("final.jsp").forward(request, response);
+        } else {
+            user.incrCountGames();
+            request.setAttribute("text",question);
+            request.getRequestDispatcher("final.jsp").forward(request, response);
+        }
+    }
+
+    private boolean checkNegativeNumber(int nextQuestonId) {
+        return nextQuestonId < 0;
+    }
+}
